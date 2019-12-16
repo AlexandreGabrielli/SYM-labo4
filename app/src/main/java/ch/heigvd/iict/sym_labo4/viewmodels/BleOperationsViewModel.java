@@ -4,6 +4,7 @@ import android.app.Application;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.util.Log;
 import android.widget.Toast;
@@ -13,10 +14,12 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import java.util.List;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.BleManagerCallbacks;
+import no.nordicsemi.android.ble.callback.DataReceivedCallback;
 import no.nordicsemi.android.ble.data.Data;
 
 public class BleOperationsViewModel extends AndroidViewModel {
@@ -176,10 +179,15 @@ public class BleOperationsViewModel extends AndroidViewModel {
             public boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
                 mConnection = gatt; //trick to force disconnection
                 Log.d(TAG, "isRequiredServiceSupported - discovered services:");
-
                 timeService = gatt.getService(UUID.fromString("00001805-0000-1000-8000-00805f9b34fb"));
                 symService = gatt.getService(UUID.fromString("3c0a1000-281d-4b48-b2a7-f15579a1c38f"));
                 currentTimeChar = timeService.getCharacteristic(UUID.fromString("00002A2B-0000-1000-8000-00805f9b34fb"));
+                gatt.setCharacteristicNotification(currentTimeChar, true); //enable or disable notifications/indications for a given characteristic.
+//                BluetoothGattDescriptor descriptor = currentTimeChar.getDescriptor(UUID.fromString("00002A2B-0000-1000-8000-00805f9b34fb"));
+//                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+//                gatt.writeDescriptor(descriptor);
+//
+//                onDescriptorWrite(gatt,descriptor,0);
                 integerChar = symService.getCharacteristic(UUID.fromString("3c0a1001-281d-4b48-b2a7-f15579a1c38f"));
                 temperatureChar = symService.getCharacteristic(UUID.fromString("3c0a1002-281d-4b48-b2a7-f15579a1c38f"));
                 buttonClickChar = symService.getCharacteristic(UUID.fromString("3c0a1003-281d-4b48-b2a7-f15579a1c38f"));
@@ -205,9 +213,18 @@ public class BleOperationsViewModel extends AndroidViewModel {
                     Dans notre cas il s'agit de s'enregistrer pour recevoir les notifications proposées par certaines
                     caractéristiques, on en profitera aussi pour mettre en place les callbacks correspondants.
                  */
-               String test = currentTimeChar.getStringValue(10);
-                System.out.println("bonjour le mode" + test);
+                setNotificationCallback(currentTimeChar)
+                        .with(new DataReceivedCallback() {
+                            @Override
+                            public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+                                Log.e(TAG, data.toString());
+                            }
+                        });
+                enableNotifications(currentTimeChar)
+                        .enqueue();
+
             }
+
 
             @Override
             protected void onDeviceDisconnected() {
@@ -229,7 +246,7 @@ public class BleOperationsViewModel extends AndroidViewModel {
                 On placera des méthodes similaires pour les autres opérations...
             */
             readCharacteristic(temperatureChar).with((device, data) -> {
-               int temperature =  data.getIntValue(Data.FORMAT_UINT16,0);
+                int temperature = data.getIntValue(Data.FORMAT_UINT16, 0);
                 mTemperatureIsConnected.setValue(temperature);
                 System.out.println(temperature);
             }).enqueue();

@@ -54,7 +54,7 @@ public class BleActivity extends BaseTemplateActivity {
     private ListView scanResults = null;
     private TextView emptyScanResults = null;
     //TODO j'ai ajouter ces deux lignes
-    private TextView temperatureScanResults=null;
+    private TextView temperatureScanResults = null;
     private Button temperatureButton = null;
 
     //menu elements
@@ -105,7 +105,7 @@ public class BleActivity extends BaseTemplateActivity {
                 //we stop scanning
                 scanLeDevice(false);
                 //we connect to the clicked device
-                bleViewModel.connect(((ScanResult)scanResultsAdapter.getItem(position)).getDevice());
+                bleViewModel.connect(((ScanResult) scanResultsAdapter.getItem(position)).getDevice());
             });
         });
 
@@ -114,8 +114,9 @@ public class BleActivity extends BaseTemplateActivity {
             updateGui();
         });
         //temperature
-        this.bleViewModel.isTemperatureConnected().observe(this,integer -> {
-            String temp = "temperature " + integer;
+        this.bleViewModel.isTemperatureConnected().observe(this, integer -> {
+            //TODO division par 6 en float
+            String temp = "temperature " + integer / 10;
             temperatureScanResults.setText(temp);
         });
     }
@@ -135,13 +136,12 @@ public class BleActivity extends BaseTemplateActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.menu_ble_search) {
-            if(isScanning)
+            if (isScanning)
                 scanLeDevice(false);
             else
                 scanLeDevice(true);
             return true;
-        }
-        else if (id == R.id.menu_ble_disconnect) {
+        } else if (id == R.id.menu_ble_disconnect) {
             bleViewModel.disconnect();
             return true;
         }
@@ -151,9 +151,9 @@ public class BleActivity extends BaseTemplateActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if(this.isScanning)
+        if (this.isScanning)
             scanLeDevice(false);
-        if(isFinishing())
+        if (isFinishing())
             this.bleViewModel.disconnect();
     }
 
@@ -164,11 +164,11 @@ public class BleActivity extends BaseTemplateActivity {
      */
     private void updateGui() {
         Boolean isConnected = this.bleViewModel.isConnected().getValue();
-        if(isConnected != null && isConnected) {
+        if (isConnected != null && isConnected) {
             this.scanPanel.setVisibility(View.GONE);
             this.operationPanel.setVisibility(View.VISIBLE);
 
-            if(this.scanMenuBtn != null && this.disconnectMenuBtn != null) {
+            if (this.scanMenuBtn != null && this.disconnectMenuBtn != null) {
                 this.scanMenuBtn.setVisible(false);
                 this.disconnectMenuBtn.setVisible(true);
             }
@@ -176,7 +176,7 @@ public class BleActivity extends BaseTemplateActivity {
             this.operationPanel.setVisibility(View.GONE);
             this.scanPanel.setVisibility(View.VISIBLE);
 
-            if(this.scanMenuBtn != null && this.disconnectMenuBtn != null) {
+            if (this.scanMenuBtn != null && this.disconnectMenuBtn != null) {
                 this.disconnectMenuBtn.setVisible(false);
                 this.scanMenuBtn.setVisible(true);
             }
@@ -205,18 +205,18 @@ public class BleActivity extends BaseTemplateActivity {
             scanResultsAdapter.clear();
 
             bluetoothScanner.startScan(filters, builderScanSettings.build(), leScanCallback);
-            Log.d(TAG,"Start scanning...");
+            Log.d(TAG, "Start scanning...");
             isScanning = true;
 
             //we scan only for 15 seconds
             handler.postDelayed(() -> {
                 scanLeDevice(false);
-            }, 15*1000L);
+            }, 15 * 1000L);
 
         } else {
             bluetoothScanner.stopScan(leScanCallback);
             isScanning = false;
-            Log.d(TAG,"Stop scanning (manual)");
+            Log.d(TAG, "Stop scanning (manual)");
         }
     }
 
