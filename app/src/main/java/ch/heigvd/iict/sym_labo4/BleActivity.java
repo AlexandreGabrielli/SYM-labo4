@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -52,6 +53,9 @@ public class BleActivity extends BaseTemplateActivity {
 
     private ListView scanResults = null;
     private TextView emptyScanResults = null;
+    //TODO j'ai ajouter ces deux lignes
+    private TextView temperatureScanResults=null;
+    private Button temperatureButton = null;
 
     //menu elements
     private MenuItem scanMenuBtn = null;
@@ -80,6 +84,10 @@ public class BleActivity extends BaseTemplateActivity {
         this.scanPanel = findViewById(R.id.ble_scan);
         this.scanResults = findViewById(R.id.ble_scanresults);
         this.emptyScanResults = findViewById(R.id.ble_scanresults_empty);
+        //TODO 3 lignes suivante
+        this.temperatureButton = findViewById(R.id.buton_temperature);
+        this.temperatureButton.setOnClickListener(v -> bleViewModel.readTemperature());
+        this.temperatureScanResults = findViewById(R.id.text_temperature);
 
         //manage scanned item
         this.scanResultsAdapter = new ResultsAdapter(this);
@@ -104,6 +112,11 @@ public class BleActivity extends BaseTemplateActivity {
         //ble events
         this.bleViewModel.isConnected().observe(this, (isConnected) -> {
             updateGui();
+        });
+        //temperature
+        this.bleViewModel.isTemperatureConnected().observe(this,integer -> {
+            String temp = "temperature " + integer;
+            temperatureScanResults.setText(temp);
         });
     }
 

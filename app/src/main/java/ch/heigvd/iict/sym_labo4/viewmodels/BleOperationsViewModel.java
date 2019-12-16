@@ -17,6 +17,7 @@ import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.BleManagerCallbacks;
+import no.nordicsemi.android.ble.data.Data;
 
 public class BleOperationsViewModel extends AndroidViewModel {
 
@@ -31,6 +32,14 @@ public class BleOperationsViewModel extends AndroidViewModel {
     public LiveData<Boolean> isConnected() {
         return mIsConnected;
     }
+
+    //live data - observer temperature
+    private final MutableLiveData<Integer> mTemperatureIsConnected = new MutableLiveData<>();
+
+    public LiveData<Integer> isTemperatureConnected() {
+        return mTemperatureIsConnected;
+    }
+
 
     //references to the Services and Characteristics of the SYM Pixl
     private BluetoothGattService timeService = null, symService = null;
@@ -196,6 +205,8 @@ public class BleOperationsViewModel extends AndroidViewModel {
                     Dans notre cas il s'agit de s'enregistrer pour recevoir les notifications proposées par certaines
                     caractéristiques, on en profitera aussi pour mettre en place les callbacks correspondants.
                  */
+               String test = currentTimeChar.getStringValue(10);
+                System.out.println("bonjour le mode" + test);
             }
 
             @Override
@@ -217,7 +228,13 @@ public class BleOperationsViewModel extends AndroidViewModel {
                 des MutableLiveData
                 On placera des méthodes similaires pour les autres opérations...
             */
-            return false; //FIXME
+            readCharacteristic(temperatureChar).with((device, data) -> {
+               int temperature =  data.getIntValue(Data.FORMAT_UINT16,0);
+                mTemperatureIsConnected.setValue(temperature);
+                System.out.println(temperature);
+            }).enqueue();
+
+            return true; //FIXME
         }
     }
 }
