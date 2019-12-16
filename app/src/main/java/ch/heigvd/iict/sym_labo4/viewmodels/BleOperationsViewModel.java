@@ -13,6 +13,8 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import java.util.UUID;
+
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.BleManagerCallbacks;
 
@@ -25,6 +27,7 @@ public class BleOperationsViewModel extends AndroidViewModel {
 
     //live data - observer
     private final MutableLiveData<Boolean> mIsConnected = new MutableLiveData<>();
+
     public LiveData<Boolean> isConnected() {
         return mIsConnected;
     }
@@ -49,7 +52,7 @@ public class BleOperationsViewModel extends AndroidViewModel {
 
     public void connect(BluetoothDevice device) {
         Log.d(TAG, "User request connection to: " + device);
-        if(!mIsConnected.getValue()) {
+        if (!mIsConnected.getValue()) {
             this.ble.connect(device)
                     .retry(1, 100)
                     .useAutoConnect(false)
@@ -60,16 +63,17 @@ public class BleOperationsViewModel extends AndroidViewModel {
     public void disconnect() {
         Log.d(TAG, "User request disconnection");
         this.ble.disconnect();
-        if(mConnection != null) {
+        if (mConnection != null) {
             mConnection.disconnect();
         }
     }
+
     /* TODO
         vous pouvez placer ici les différentes méthodes permettant à l'utilisateur
         d'interagir avec le périphérique depuis l'activité
      */
     public boolean readTemperature() {
-        if(!isConnected().getValue() || temperatureChar == null) return false;
+        if (!isConnected().getValue() || temperatureChar == null) return false;
         return ble.readTemperature();
     }
 
@@ -150,7 +154,9 @@ public class BleOperationsViewModel extends AndroidViewModel {
         }
 
         @Override
-        public BleManagerGattCallback getGattCallback() { return mGattCallback; }
+        public BleManagerGattCallback getGattCallback() {
+            return mGattCallback;
+        }
 
         /**
          * BluetoothGatt callbacks object.
@@ -162,6 +168,15 @@ public class BleOperationsViewModel extends AndroidViewModel {
                 mConnection = gatt; //trick to force disconnection
                 Log.d(TAG, "isRequiredServiceSupported - discovered services:");
 
+                timeService = gatt.getService(UUID.fromString("00001805-0000-1000-8000-00805f9b34fb"));
+                symService = gatt.getService(UUID.fromString("3c0a1000-281d-4b48-b2a7-f15579a1c38f"));
+                currentTimeChar = timeService.getCharacteristic(UUID.fromString("00002A2B-0000-1000-8000-00805f9b34fb"));
+                integerChar = symService.getCharacteristic(UUID.fromString("3c0a1001-281d-4b48-b2a7-f15579a1c38f"));
+                temperatureChar = symService.getCharacteristic(UUID.fromString("3c0a1002-281d-4b48-b2a7-f15579a1c38f"));
+                buttonClickChar = symService.getCharacteristic(UUID.fromString("3c0a1003-281d-4b48-b2a7-f15579a1c38f"));
+
+                return timeService != null && symService != null && currentTimeChar != null && integerChar != null
+                        && temperatureChar != null && buttonClickChar != null;
                 /* TODO
                     - Nous devons vérifier ici que le périphérique auquel on vient de se connecter possède
                       bien tous les services et les caractéristiques attendues, on vérifiera aussi que les
@@ -171,7 +186,6 @@ public class BleOperationsViewModel extends AndroidViewModel {
                  */
 
                 //FIXME si tout est OK, on retourne true, sinon la librairie appelera la méthode onDeviceNotSupported()
-                return false;
             }
 
             @Override
