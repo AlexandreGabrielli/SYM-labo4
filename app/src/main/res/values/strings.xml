@@ -17,5 +17,9 @@
 
     <string name="ble_sendvalue_title">Envoi de valeur</string>
     <string name="ble_sendvalue_send">Send</string>
+    <string name="ble_temperature_button">get temperature</string>
+    <string name="ble_set_time_button">set time</string>
+    <string name="ble_send_button">send random number</string>
+    <string name="ble_device_title">connected to </string>
 
 </resources>

@@ -4,7 +4,6 @@ import android.app.Application;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.util.Log;
 import android.widget.Toast;
@@ -14,12 +13,13 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import java.util.List;
+import java.nio.ByteBuffer;
+import java.util.Calendar;
+import java.util.Random;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.BleManagerCallbacks;
-import no.nordicsemi.android.ble.callback.DataReceivedCallback;
 import no.nordicsemi.android.ble.data.Data;
 
 public class BleOperationsViewModel extends AndroidViewModel {
@@ -43,6 +43,19 @@ public class BleOperationsViewModel extends AndroidViewModel {
         return mTemperatureIsConnected;
     }
 
+    //live data - observer clickCounter
+    private final MutableLiveData<Integer> mclickIsConnected = new MutableLiveData<>();
+
+    public LiveData<Integer> isclickConnected() {
+        return mclickIsConnected;
+    }
+
+    //live data - observer clickCounter
+    private final MutableLiveData<String> mTimeIsConnected = new MutableLiveData<>();
+
+    public LiveData<String> isTimeConnected() {
+        return mTimeIsConnected;
+    }
 
     //references to the Services and Characteristics of the SYM Pixl
     private BluetoothGattService timeService = null, symService = null;
@@ -84,6 +97,18 @@ public class BleOperationsViewModel extends AndroidViewModel {
         vous pouvez placer ici les différentes méthodes permettant à l'utilisateur
         d'interagir avec le périphérique depuis l'activité
      */
+    public boolean sendInt() {
+        if (!isConnected().getValue() || integerChar == null) return false;
+        return ble.sendInt();
+    }
+
+    public boolean setTime() {
+        if (!isConnected().getValue() || currentTimeChar == null) return false;
+        return ble.setTime();
+
+    }
+
+
     public boolean readTemperature() {
         if (!isConnected().getValue() || temperatureChar == null) return false;
         return ble.readTemperature();
@@ -156,6 +181,7 @@ public class BleOperationsViewModel extends AndroidViewModel {
         }
     };
 
+
     /*
      *  This class is used to implement the protocol to communicate with the BLE device
      */
@@ -183,11 +209,7 @@ public class BleOperationsViewModel extends AndroidViewModel {
                 symService = gatt.getService(UUID.fromString("3c0a1000-281d-4b48-b2a7-f15579a1c38f"));
                 currentTimeChar = timeService.getCharacteristic(UUID.fromString("00002A2B-0000-1000-8000-00805f9b34fb"));
                 gatt.setCharacteristicNotification(currentTimeChar, true); //enable or disable notifications/indications for a given characteristic.
-//                BluetoothGattDescriptor descriptor = currentTimeChar.getDescriptor(UUID.fromString("00002A2B-0000-1000-8000-00805f9b34fb"));
-//                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-//                gatt.writeDescriptor(descriptor);
-//
-//                onDescriptorWrite(gatt,descriptor,0);
+
                 integerChar = symService.getCharacteristic(UUID.fromString("3c0a1001-281d-4b48-b2a7-f15579a1c38f"));
                 temperatureChar = symService.getCharacteristic(UUID.fromString("3c0a1002-281d-4b48-b2a7-f15579a1c38f"));
                 buttonClickChar = symService.getCharacteristic(UUID.fromString("3c0a1003-281d-4b48-b2a7-f15579a1c38f"));
@@ -214,13 +236,24 @@ public class BleOperationsViewModel extends AndroidViewModel {
                     caractéristiques, on en profitera aussi pour mettre en place les callbacks correspondants.
                  */
                 setNotificationCallback(currentTimeChar)
-                        .with(new DataReceivedCallback() {
-                            @Override
-                            public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-                                Log.e(TAG, data.toString());
+                        .with((device, data) -> {
+                            // Log.e(TAG, data.toString());
+                            for (int i = 0; i <= 9; i++) {
+
+
+                                System.out.println("at" + i + ":" + (int) data.getByte(i));
                             }
+                            mTimeIsConnected.setValue(data.toString());
                         });
                 enableNotifications(currentTimeChar)
+                        .enqueue();
+
+                setNotificationCallback(buttonClickChar)
+                        .with((device, data) -> {
+                            int clickCounter = data.getIntValue(Data.FORMAT_UINT8, 0);
+                            mclickIsConnected.setValue(clickCounter);
+                        });
+                enableIndications(buttonClickChar)
                         .enqueue();
 
             }
@@ -248,10 +281,46 @@ public class BleOperationsViewModel extends AndroidViewModel {
             readCharacteristic(temperatureChar).with((device, data) -> {
                 int temperature = data.getIntValue(Data.FORMAT_UINT16, 0);
                 mTemperatureIsConnected.setValue(temperature);
-                System.out.println(temperature);
             }).enqueue();
-
             return true; //FIXME
+        }
+
+        /*
+             TODO: write this
+         */
+        Random rand = new Random();
+
+        public boolean sendInt() {
+            final int MAX = 50;
+            final int MIN = 0;
+            int a = rand.nextInt(MAX - MIN + 1) + MIN;
+            Data data = Data.from(Integer.toString(a));
+            writeCharacteristic(integerChar, data).enqueue();
+
+            return true;
+        }
+
+        public boolean setTime() {
+            Calendar calendar = Calendar.getInstance();
+            short year = (short) calendar.get(Calendar.YEAR);
+            ByteBuffer bufferYear = ByteBuffer.allocate(2);
+            bufferYear.putShort(year);
+            byte [] bytesYears =  bufferYear.array();
+            byte [] bytes = {
+                    bytesYears[1],
+                    bytesYears[0],
+                    (byte) calendar.get(Calendar.MONTH),
+                    (byte) calendar.get(Calendar.DAY_OF_MONTH),
+                    (byte) calendar.get(Calendar.HOUR),
+                    (byte) calendar.get(Calendar.MINUTE),
+                    (byte) calendar.get(Calendar.SECOND),
+                    (byte) calendar.get(Calendar.DAY_OF_WEEK),
+                    0x0,
+                    0x0
+            };
+
+            writeCharacteristic(currentTimeChar, bytes).enqueue();
+            return true;
         }
     }
 }

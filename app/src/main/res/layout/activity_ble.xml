@@ -10,7 +10,7 @@
         android:id="@+id/ble_operation"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible" >
+        android:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -18,16 +18,52 @@
             android:orientation="vertical">
 
             <!-- TODO vous placerez dans ce layout toutes les vues nécessaire aux intéractions avec le périphérique BLE -->
-            <Button
-                android:id="@+id/buton_temperature"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                />
             <TextView
-                android:id="@+id/text_temperature"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:text="@string/ble_device_title"
                 />
+
+            <TextView
+                android:id="@+id/ble_temperature_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/ble_time_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/ble_click_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center" />
+
+
+            <Button
+                android:id="@+id/ble_temperature_button"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/ble_temperature_button" />
+
+            <Button
+                android:id="@+id/ble_send_int"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/ble_send_button" />
+
+            <Button
+                android:id="@+id/ble_set_time"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/ble_set_time_button" />
+
         </LinearLayout>
 
     </ScrollView>
@@ -47,9 +83,9 @@
             android:id="@+id/ble_scanresults_empty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ble_empty"
             android:layout_centerInParent="true"
-            android:gravity="center" />
+            android:gravity="center"
+            android:text="@string/ble_empty" />
 
     </RelativeLayout>
 

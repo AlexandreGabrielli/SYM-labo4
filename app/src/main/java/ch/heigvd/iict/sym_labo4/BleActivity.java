@@ -17,9 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.lifecycle.ViewModelProviders;
@@ -53,9 +51,13 @@ public class BleActivity extends BaseTemplateActivity {
 
     private ListView scanResults = null;
     private TextView emptyScanResults = null;
-    //TODO j'ai ajouter ces deux lignes
+    //TODO j'ai ajouter ces 3 lignes
     private TextView temperatureScanResults = null;
+    private TextView clickResults = null;
     private Button temperatureButton = null;
+    private Button sendIntButton = null;
+    private Button setTimeButton = null;
+    private TextView timeResults = null;
 
     //menu elements
     private MenuItem scanMenuBtn = null;
@@ -85,9 +87,15 @@ public class BleActivity extends BaseTemplateActivity {
         this.scanResults = findViewById(R.id.ble_scanresults);
         this.emptyScanResults = findViewById(R.id.ble_scanresults_empty);
         //TODO 3 lignes suivante
-        this.temperatureButton = findViewById(R.id.buton_temperature);
+        this.temperatureButton = findViewById(R.id.ble_temperature_button);
         this.temperatureButton.setOnClickListener(v -> bleViewModel.readTemperature());
-        this.temperatureScanResults = findViewById(R.id.text_temperature);
+        this.temperatureScanResults = findViewById(R.id.ble_temperature_text);
+        this.sendIntButton = findViewById(R.id.ble_send_int);
+        this.sendIntButton.setOnClickListener(v -> bleViewModel.sendInt());
+        this.setTimeButton = findViewById(R.id.ble_set_time);
+        this.setTimeButton.setOnClickListener(v -> bleViewModel.setTime());
+        this.clickResults = findViewById(R.id.ble_click_text);
+        this.timeResults = findViewById(R.id.ble_time_text);
 
         //manage scanned item
         this.scanResultsAdapter = new ResultsAdapter(this);
@@ -116,9 +124,19 @@ public class BleActivity extends BaseTemplateActivity {
         //temperature
         this.bleViewModel.isTemperatureConnected().observe(this, integer -> {
             //TODO division par 6 en float
-            String temp = "temperature " + integer / 10;
+            String temp = "temperature " + integer / 10.0;
             temperatureScanResults.setText(temp);
         });
+        //clickCounter
+        this.bleViewModel.isclickConnected().observe(this,integer -> {
+            String click = "click counter " + integer;
+            clickResults.setText(click);
+        });
+        //time
+        this.bleViewModel.isTimeConnected().observe(this,s -> {
+            timeResults.setText(s);
+        });
+
     }
 
     @Override
