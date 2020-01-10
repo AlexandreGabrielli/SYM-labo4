@@ -239,7 +239,7 @@ public class BleOperationsViewModel extends AndroidViewModel {
                 setNotificationCallback(currentTimeChar)
                         .with((device, data) -> {
                             Calendar calendar = Calendar.getInstance();
-                            calendar.set(data.getIntValue(Data.FORMAT_UINT16,0),data.getIntValue(Data.FORMAT_UINT8,2),data.getIntValue(Data.FORMAT_UINT8,3),
+                            calendar.set(data.getIntValue(Data.FORMAT_UINT16,0),data.getIntValue(Data.FORMAT_UINT8,2)-1,data.getIntValue(Data.FORMAT_UINT8,3),
                                     data.getIntValue(Data.FORMAT_UINT8,4), data.getIntValue(Data.FORMAT_UINT8,5),data.getIntValue(Data.FORMAT_UINT8,6));
 
                             String result = calendar.get(Calendar.HOUR_OF_DAY) +"H" + calendar.get(Calendar.MINUTE)+ "m"+ calendar.get(Calendar.SECOND)
