@@ -123,7 +123,7 @@ public class BleActivity extends BaseTemplateActivity {
         });
         //temperature
         this.bleViewModel.isTemperatureConnected().observe(this, integer -> {
-            //TODO division par 6 en float
+            //TODO division par 10 en float
             String temp = "temperature " + integer / 10.0;
             temperatureScanResults.setText(temp);
         });

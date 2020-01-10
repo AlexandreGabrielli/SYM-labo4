@@ -213,6 +213,7 @@ public class BleOperationsViewModel extends AndroidViewModel {
                 integerChar = symService.getCharacteristic(UUID.fromString("3c0a1001-281d-4b48-b2a7-f15579a1c38f"));
                 temperatureChar = symService.getCharacteristic(UUID.fromString("3c0a1002-281d-4b48-b2a7-f15579a1c38f"));
                 buttonClickChar = symService.getCharacteristic(UUID.fromString("3c0a1003-281d-4b48-b2a7-f15579a1c38f"));
+                gatt.setCharacteristicNotification(buttonClickChar,true);
 
                 return timeService != null && symService != null && currentTimeChar != null && integerChar != null
                         && temperatureChar != null && buttonClickChar != null;
@@ -237,13 +238,13 @@ public class BleOperationsViewModel extends AndroidViewModel {
                  */
                 setNotificationCallback(currentTimeChar)
                         .with((device, data) -> {
-                            // Log.e(TAG, data.toString());
-                            for (int i = 0; i <= 9; i++) {
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.set(data.getIntValue(Data.FORMAT_UINT16,0),data.getIntValue(Data.FORMAT_UINT8,2),data.getIntValue(Data.FORMAT_UINT8,3),
+                                    data.getIntValue(Data.FORMAT_UINT8,4), data.getIntValue(Data.FORMAT_UINT8,5),data.getIntValue(Data.FORMAT_UINT8,6));
 
-
-                                System.out.println("at" + i + ":" + (int) data.getByte(i));
-                            }
-                            mTimeIsConnected.setValue(data.toString());
+                            String result = calendar.get(Calendar.HOUR_OF_DAY) +"H" + calendar.get(Calendar.MINUTE)+ "m"+ calendar.get(Calendar.SECOND)
+                                    +" the "+ calendar.get(Calendar.DATE)+ "/" + (calendar.get(Calendar.MONTH)+1) + "/"+calendar.get(Calendar.YEAR);
+                            mTimeIsConnected.setValue(result);
                         });
                 enableNotifications(currentTimeChar)
                         .enqueue();
@@ -251,6 +252,7 @@ public class BleOperationsViewModel extends AndroidViewModel {
                 setNotificationCallback(buttonClickChar)
                         .with((device, data) -> {
                             int clickCounter = data.getIntValue(Data.FORMAT_UINT8, 0);
+                            System.out.println("-------------------------------"+clickCounter);
                             mclickIsConnected.setValue(clickCounter);
                         });
                 enableIndications(buttonClickChar)
@@ -309,9 +311,9 @@ public class BleOperationsViewModel extends AndroidViewModel {
             byte [] bytes = {
                     bytesYears[1],
                     bytesYears[0],
-                    (byte) calendar.get(Calendar.MONTH),
+                    (byte) (calendar.get(Calendar.MONTH) + 1),
                     (byte) calendar.get(Calendar.DAY_OF_MONTH),
-                    (byte) calendar.get(Calendar.HOUR),
+                    (byte) calendar.get(Calendar.HOUR_OF_DAY),
                     (byte) calendar.get(Calendar.MINUTE),
                     (byte) calendar.get(Calendar.SECOND),
                     (byte) calendar.get(Calendar.DAY_OF_WEEK),
