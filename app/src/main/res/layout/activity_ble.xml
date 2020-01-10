@@ -28,13 +28,13 @@
                 />
 
             <TextView
-                android:id="@+id/ble_temperature_text"
+                android:id="@+id/ble_time_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center" />
 
             <TextView
-                android:id="@+id/ble_time_text"
+                android:id="@+id/ble_temperature_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center" />
@@ -52,6 +52,13 @@
                 android:layout_height="match_parent"
                 android:text="@string/ble_temperature_button" />
 
+            <EditText
+                android:id="@+id/ble_int"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/ble_int"
+                />
+
             <Button
                 android:id="@+id/ble_send_int"
                 android:layout_width="match_parent"
@@ -64,6 +71,11 @@
                 android:layout_height="match_parent"
                 android:text="@string/ble_set_time_button" />
 
+            <TextView
+                android:id="@+id/ble_info_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center" />
         </LinearLayout>
 
     </ScrollView>

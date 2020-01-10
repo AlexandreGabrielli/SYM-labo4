@@ -97,9 +97,9 @@ public class BleOperationsViewModel extends AndroidViewModel {
         vous pouvez placer ici les différentes méthodes permettant à l'utilisateur
         d'interagir avec le périphérique depuis l'activité
      */
-    public boolean sendInt() {
+    public boolean sendInt(int integer) {
         if (!isConnected().getValue() || integerChar == null) return false;
-        return ble.sendInt();
+        return ble.sendInt( integer);
     }
 
     public boolean setTime() {
@@ -255,7 +255,7 @@ public class BleOperationsViewModel extends AndroidViewModel {
                             System.out.println("-------------------------------"+clickCounter);
                             mclickIsConnected.setValue(clickCounter);
                         });
-                enableIndications(buttonClickChar)
+                enableNotifications(buttonClickChar)
                         .enqueue();
 
             }
@@ -292,11 +292,8 @@ public class BleOperationsViewModel extends AndroidViewModel {
          */
         Random rand = new Random();
 
-        public boolean sendInt() {
-            final int MAX = 50;
-            final int MIN = 0;
-            int a = rand.nextInt(MAX - MIN + 1) + MIN;
-            Data data = Data.from(Integer.toString(a));
+        public boolean sendInt(int integer) {
+            Data data = Data.from(Integer.toString(integer));
             writeCharacteristic(integerChar, data).enqueue();
 
             return true;

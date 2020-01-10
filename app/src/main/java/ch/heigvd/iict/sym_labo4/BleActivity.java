@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -58,7 +59,8 @@ public class BleActivity extends BaseTemplateActivity {
     private Button sendIntButton = null;
     private Button setTimeButton = null;
     private TextView timeResults = null;
-
+    private EditText editText = null;
+    private TextView infotext = null;
     //menu elements
     private MenuItem scanMenuBtn = null;
     private MenuItem disconnectMenuBtn = null;
@@ -91,12 +93,20 @@ public class BleActivity extends BaseTemplateActivity {
         this.temperatureButton.setOnClickListener(v -> bleViewModel.readTemperature());
         this.temperatureScanResults = findViewById(R.id.ble_temperature_text);
         this.sendIntButton = findViewById(R.id.ble_send_int);
-        this.sendIntButton.setOnClickListener(v -> bleViewModel.sendInt());
+        this.sendIntButton.setOnClickListener(v -> {
+            try {
+                int result = Integer.parseInt(this.editText.getText().toString());
+                bleViewModel.sendInt(result);
+            } catch (Exception err){
+                this.infotext.setText(R.string.ble_not_a_number);
+            }
+        });
         this.setTimeButton = findViewById(R.id.ble_set_time);
         this.setTimeButton.setOnClickListener(v -> bleViewModel.setTime());
         this.clickResults = findViewById(R.id.ble_click_text);
         this.timeResults = findViewById(R.id.ble_time_text);
-
+        this.editText = findViewById(R.id.ble_int);
+        this.infotext = findViewById(R.id.ble_info_text);
         //manage scanned item
         this.scanResultsAdapter = new ResultsAdapter(this);
         this.scanResults.setAdapter(this.scanResultsAdapter);
