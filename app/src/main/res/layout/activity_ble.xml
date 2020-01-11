@@ -17,15 +17,13 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- TODO vous placerez dans ce layout toutes les vues nécessaire aux intéractions avec le périphérique BLE -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:textStyle="bold"
-                android:textSize="20sp"
                 android:text="@string/ble_device_title"
-                />
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/ble_time_text"
@@ -56,8 +54,7 @@
                 android:id="@+id/ble_int"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="@string/ble_int"
-                />
+                android:hint="@string/ble_int" />
 
             <Button
                 android:id="@+id/ble_send_int"

@@ -52,7 +52,6 @@ public class BleActivity extends BaseTemplateActivity {
 
     private ListView scanResults = null;
     private TextView emptyScanResults = null;
-    //TODO j'ai ajouter ces 3 lignes
     private TextView temperatureScanResults = null;
     private TextView clickResults = null;
     private Button temperatureButton = null;
@@ -97,7 +96,7 @@ public class BleActivity extends BaseTemplateActivity {
             try {
                 int result = Integer.parseInt(this.editText.getText().toString());
                 bleViewModel.sendInt(result);
-            } catch (Exception err){
+            } catch (Exception err) {
                 this.infotext.setText(R.string.ble_not_a_number);
             }
         });
@@ -138,12 +137,12 @@ public class BleActivity extends BaseTemplateActivity {
             temperatureScanResults.setText(temp);
         });
         //clickCounter
-        this.bleViewModel.isclickConnected().observe(this,integer -> {
+        this.bleViewModel.isclickConnected().observe(this, integer -> {
             String click = "click counter " + integer;
             clickResults.setText(click);
         });
         //time
-        this.bleViewModel.isTimeConnected().observe(this,s -> {
+        this.bleViewModel.isTimeConnected().observe(this, s -> {
             timeResults.setText(s);
         });
 
@@ -223,8 +222,6 @@ public class BleActivity extends BaseTemplateActivity {
 
             //we scan for any BLE device
             //we don't filter them based on advertised services...
-            //TODO ajouter un filtre pour n'afficher que les devices proposant
-            // le service "SYM" (UUID: "3c0a1000-281d-4b48-b2a7-f15579a1c38f")
             ScanFilter scanFilter = new ScanFilter.Builder()
                     .setServiceUuid(ParcelUuid.fromString("3c0a1000-281d-4b48-b2a7-f15579a1c38f")).build();
             List<ScanFilter> filters = new ArrayList<ScanFilter>();

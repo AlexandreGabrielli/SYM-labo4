@@ -99,7 +99,7 @@ public class BleOperationsViewModel extends AndroidViewModel {
      */
     public boolean sendInt(int integer) {
         if (!isConnected().getValue() || integerChar == null) return false;
-        return ble.sendInt( integer);
+        return ble.sendInt(integer);
     }
 
     public boolean setTime() {
@@ -213,37 +213,24 @@ public class BleOperationsViewModel extends AndroidViewModel {
                 integerChar = symService.getCharacteristic(UUID.fromString("3c0a1001-281d-4b48-b2a7-f15579a1c38f"));
                 temperatureChar = symService.getCharacteristic(UUID.fromString("3c0a1002-281d-4b48-b2a7-f15579a1c38f"));
                 buttonClickChar = symService.getCharacteristic(UUID.fromString("3c0a1003-281d-4b48-b2a7-f15579a1c38f"));
-                gatt.setCharacteristicNotification(buttonClickChar,true);
+                gatt.setCharacteristicNotification(buttonClickChar, true);
 
                 return timeService != null && symService != null && currentTimeChar != null && integerChar != null
                         && temperatureChar != null && buttonClickChar != null;
-                /* TODO
-                    - Nous devons vérifier ici que le périphérique auquel on vient de se connecter possède
-                      bien tous les services et les caractéristiques attendues, on vérifiera aussi que les
-                      caractéristiques présentent bien les opérations attendues
-                    - On en profitera aussi pour garder les références vers les différents services et
-                      caractéristiques (déclarés en lignes 33 et 34)
-                 */
 
-                //FIXME si tout est OK, on retourne true, sinon la librairie appelera la méthode onDeviceNotSupported()
             }
 
             @Override
             protected void initialize() {
-                /* TODO
-                    Ici nous somme sûr que le périphérique possède bien tous les services et caractéristiques
-                    attendus et que nous y sommes connectés. Nous pouvous effectuer les premiers échanges BLE:
-                    Dans notre cas il s'agit de s'enregistrer pour recevoir les notifications proposées par certaines
-                    caractéristiques, on en profitera aussi pour mettre en place les callbacks correspondants.
-                 */
+
                 setNotificationCallback(currentTimeChar)
                         .with((device, data) -> {
                             Calendar calendar = Calendar.getInstance();
-                            calendar.set(data.getIntValue(Data.FORMAT_UINT16,0),data.getIntValue(Data.FORMAT_UINT8,2)-1,data.getIntValue(Data.FORMAT_UINT8,3),
-                                    data.getIntValue(Data.FORMAT_UINT8,4), data.getIntValue(Data.FORMAT_UINT8,5),data.getIntValue(Data.FORMAT_UINT8,6));
+                            calendar.set(data.getIntValue(Data.FORMAT_UINT16, 0), data.getIntValue(Data.FORMAT_UINT8, 2) - 1, data.getIntValue(Data.FORMAT_UINT8, 3),
+                                    data.getIntValue(Data.FORMAT_UINT8, 4), data.getIntValue(Data.FORMAT_UINT8, 5), data.getIntValue(Data.FORMAT_UINT8, 6));
 
-                            String result = calendar.get(Calendar.HOUR_OF_DAY) +"H" + calendar.get(Calendar.MINUTE)+ "m"+ calendar.get(Calendar.SECOND)
-                                    +" the "+ calendar.get(Calendar.DATE)+ "/" + (calendar.get(Calendar.MONTH)+1) + "/"+calendar.get(Calendar.YEAR);
+                            String result = calendar.get(Calendar.HOUR_OF_DAY) + "H" + calendar.get(Calendar.MINUTE) + "m" + calendar.get(Calendar.SECOND)
+                                    + " the " + calendar.get(Calendar.DATE) + "/" + (calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.YEAR);
                             mTimeIsConnected.setValue(result);
                         });
                 enableNotifications(currentTimeChar)
@@ -252,7 +239,7 @@ public class BleOperationsViewModel extends AndroidViewModel {
                 setNotificationCallback(buttonClickChar)
                         .with((device, data) -> {
                             int clickCounter = data.getIntValue(Data.FORMAT_UINT8, 0);
-                            System.out.println("-------------------------------"+clickCounter);
+                            System.out.println("-------------------------------" + clickCounter);
                             mclickIsConnected.setValue(clickCounter);
                         });
                 enableNotifications(buttonClickChar)
@@ -275,22 +262,12 @@ public class BleOperationsViewModel extends AndroidViewModel {
         };
 
         public boolean readTemperature() {
-            /* TODO on peut effectuer ici la lecture de la caractéristique température
-                la valeur récupérée sera envoyée à l'activité en utilisant le mécanisme
-                des MutableLiveData
-                On placera des méthodes similaires pour les autres opérations...
-            */
             readCharacteristic(temperatureChar).with((device, data) -> {
                 int temperature = data.getIntValue(Data.FORMAT_UINT16, 0);
                 mTemperatureIsConnected.setValue(temperature);
             }).enqueue();
-            return true; //FIXME
+            return true;
         }
-
-        /*
-             TODO: write this
-         */
-        Random rand = new Random();
 
         public boolean sendInt(int integer) {
             Data data = Data.from(Integer.toString(integer));
@@ -304,8 +281,8 @@ public class BleOperationsViewModel extends AndroidViewModel {
             short year = (short) calendar.get(Calendar.YEAR);
             ByteBuffer bufferYear = ByteBuffer.allocate(2);
             bufferYear.putShort(year);
-            byte [] bytesYears =  bufferYear.array();
-            byte [] bytes = {
+            byte[] bytesYears = bufferYear.array();
+            byte[] bytes = {
                     bytesYears[1],
                     bytesYears[0],
                     (byte) (calendar.get(Calendar.MONTH) + 1),
